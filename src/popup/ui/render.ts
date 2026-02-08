@@ -1,4 +1,5 @@
 import { Keyword, Site, ScraperStatus } from '../../types';
+import { escapeHtml } from '../../shared/utils';
 
 export class Renderer {
   private container: HTMLElement | null;
@@ -12,10 +13,10 @@ export class Renderer {
   public renderKeywords(
     keywords: Keyword[],
     handlers: {
-      onDelete: () => void;
-      onStartScraping: () => void;
-      onCancelScraping: () => void;
-      onShowStats: () => void;
+      onDelete: (id: string) => void;
+      onStartScraping: (id: string, site: Site) => void;
+      onCancelScraping: (id: string, site: Site) => void;
+      onShowStats: (id: string) => void;
     },
   ) {
     if (!this.container || !this.emptyState) return;
@@ -36,7 +37,28 @@ export class Renderer {
     });
   }
 
-  private attachHandlers(keyword: Keyword, handlers: any) {}
+  private attachHandlers(keyword: Keyword, handlers: any) {
+    const deleteBtn = document.querySelector(
+      `[data-delete-id="${keyword.id}"]`,
+    );
+    deleteBtn?.addEventListener('click', () => handlers.onDelete(keyword.id));
+
+    const falabellaBtn = document.querySelector(
+      `[data-scrape-id="${keyword.id}"][data-site="falabella"]`,
+    );
+    falabellaBtn?.addEventListener('click', () =>
+      handlers.onStartScraping(keyword.id, 'falabella'),
+    );
+
+    (['falabella', 'mercadolibre'] as Site[]).forEach((site) => {
+      const cancelBtn = document.querySelector(
+        `[data-cancel-id="${keyword.id}"][data-site="${site}"]`,
+      );
+      cancelBtn?.addEventListener('click', () =>
+        handlers.onCancelScraping(keyword.id, site),
+      );
+    });
+  }
 
   private createKeywordHTML(keyword: Keyword): string {
     const statusFalabella = keyword.status.falabella;
@@ -45,8 +67,8 @@ export class Renderer {
     return `
       <div class="keyword-item">
         <div class="keyword-header">
-          <div class="keyword-title">Keyword: ${keyword.text}</div>
-          <button class="delete-btn" data-delete-id="${keyword.id}">Eliminar</button>
+          <div class="keyword-title">${escapeHtml(keyword.text)}</div>
+          <button class="delete-btn" data-delete-id="${keyword.id}">🗑️ Eliminar</button>
         </div>
         
         <div class="keyword-actions">

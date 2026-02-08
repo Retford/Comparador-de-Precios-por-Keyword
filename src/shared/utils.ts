@@ -11,3 +11,32 @@ export const parsePrice = (priceText: string | null): number => {
   }
   return parseFloat(numeric) || 0;
 };
+
+export const escapeHtml = (text: string): string => {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+};
+
+export const waitForContent = (
+  selector: string,
+  timeout: number = 5000,
+): Promise<boolean> => {
+  return new Promise((resolve) => {
+    if (document.querySelector(selector)) return resolve(true);
+
+    const observer = new MutationObserver(() => {
+      if (document.querySelector(selector)) {
+        observer.disconnect();
+        resolve(true);
+      }
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    setTimeout(() => {
+      observer.disconnect();
+      resolve(!!document.querySelector(selector));
+    }, timeout);
+  });
+};
