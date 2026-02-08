@@ -1,0 +1,48 @@
+{
+  "manifest_version": 3,
+  "name": "Comparador de Precios - Falabella vs MercadoLibre",
+  "version": "1.0.0",
+  "description": "Compara precios de productos entre Falabella y MercadoLibre por keywords",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://www.falabella.com.pe/*",
+    "https://www.falabella.com/*",
+    "https://www.mercadolibre.com.pe/*",
+    "https://listado.mercadolibre.com.pe/*"
+  ],
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "src/background/background.ts",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.falabella.com.pe/*",
+        "https://www.falabella.com/*",
+        "https://www.mercadolibre.com.pe/*",
+        "https://listado.mercadolibre.com.pe/*"
+      ],
+      "js": [
+        "src/content/index.ts"
+      ]
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
