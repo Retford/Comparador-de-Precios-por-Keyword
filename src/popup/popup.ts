@@ -4,7 +4,9 @@ import {
   StartScrapingMessage,
   CancelScrapingMessage,
 } from '../types';
+import { statisticsService } from './services/stats';
 import { Renderer } from './ui/render';
+import { storageService } from '../shared/storage';
 import './style.css';
 
 class PopupController {
@@ -18,9 +20,11 @@ class PopupController {
   public async init() {
     await this.loadAndRender();
     this.setupEventListeners();
+    this.setupStorageListener();
   }
 
   private async loadAndRender() {
+    this.keywords = await storageService.getKeywords();
     this.render();
   }
 
@@ -33,6 +37,15 @@ class PopupController {
     addBtn?.addEventListener('click', () => this.handleAddKeyword());
     input?.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') this.handleAddKeyword();
+    });
+  }
+
+  private setupStorageListener() {
+    chrome.storage.onChanged.addListener((changes, namespace) => {
+      if (namespace === 'local' && changes.keywords) {
+        this.keywords = (changes.keywords.newValue || []) as Keyword[];
+        this.render();
+      }
     });
   }
 
@@ -62,6 +75,7 @@ class PopupController {
     };
 
     this.keywords.push(newKeyword);
+    await storageService.setKeywords(this.keywords);
     if (input) input.value = '';
   }
 
@@ -72,9 +86,12 @@ class PopupController {
     if (keyword) {
       if (keyword.status.falabella === 'running')
         this.handleCancelScraping(id, 'falabella');
+      if (keyword.status.mercadolibre === 'running')
+        this.handleCancelScraping(id, 'mercadolibre');
     }
 
     this.keywords = this.keywords.filter((k) => k.id !== id);
+    await storageService.setKeywords(this.keywords);
   }
 
   private handleStartScraping(id: string, site: Site) {
@@ -107,6 +124,20 @@ class PopupController {
   private handleShowStats(id: string) {
     const keyword = this.keywords.find((k) => k.id === id);
     if (!keyword) return;
+
+    const stats = statisticsService.calculateStats(
+      keyword.results.falabella || [],
+      keyword.results.mercadolibre || [],
+    );
+
+    if (stats.length === 0) {
+      alert(
+        'No hay datos suficientes o no se encontraron productos similares.',
+      );
+      return;
+    }
+
+    this.renderer.showStatsModal(keyword.text, stats);
   }
 
   private render() {

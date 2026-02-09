@@ -57,8 +57,7 @@ export class FalabellaScraper extends BaseScraper {
     elements.forEach((el, index) => {
       try {
         const titleEl = el.querySelector('.pod-subTitle.subTitle-rebrand');
-        if (!titleEl) return;
-        const title = titleEl.textContent?.trim() || '';
+        const title = titleEl ? titleEl.textContent?.trim() || null : null;
 
         const priceEl = el.querySelector('.copy10');
         const priceText = priceEl ? priceEl.textContent?.trim() || null : null;
@@ -68,6 +67,9 @@ export class FalabellaScraper extends BaseScraper {
 
         const brandEl = el.querySelector('.pod-title.title-rebrand');
         const brand = brandEl ? brandEl.textContent?.trim() || null : null;
+
+        const sellerEl = el.querySelector('.pod-sellerText.seller-text-rebrand');
+        const seller = sellerEl ? sellerEl.textContent.split(' ').splice(1).join(' ').trim() || null : null
 
         if (title && url) {
           extracted.push({
@@ -80,7 +82,7 @@ export class FalabellaScraper extends BaseScraper {
             priceNumeric: parsePrice(priceText),
             url,
             brand,
-            seller: 'Falabella',
+            seller: seller,
           });
         }
       } catch (e) {
