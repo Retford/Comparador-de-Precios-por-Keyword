@@ -156,11 +156,11 @@ export class Renderer {
                 <div class="price-comparison">
                   <div class="price-item">
                     <div class="price-label">Falabella (Prom.)</div>
-                    <div class="price-value">S/ ${stat.avgFalabella.toFixed(2)}</div>
+                    <div class="price-value">S/ ${stat.avgFalabella}</div>
                   </div>
                   <div class="price-item">
                     <div class="price-label">MercadoLibre (Prom.)</div>
-                    <div class="price-value">S/ ${stat.avgMercadoLibre.toFixed(2)}</div>
+                    <div class="price-value">S/ ${stat.avgMercadoLibre}</div>
                   </div>
                 </div>
                 
